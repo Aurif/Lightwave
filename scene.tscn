@@ -1,0 +1,108 @@
+[gd_scene load_steps=8 format=4 uid="uid://cro2m5utrrmnf"]
+
+[ext_resource type="Texture2D" uid="uid://dt4vivryhhu2c" path="res://assets/sprites/white.png" id="1_ulcgi"]
+[ext_resource type="Script" uid="uid://j5eqxmva33y3" path="res://components/atm/random_pattern/random_pattern.gd" id="2_nxogm"]
+
+[sub_resource type="Gradient" id="Gradient_drvgu"]
+colors = PackedColorArray(0.20784314, 0.19215687, 0.26666668, 0, 0.16862746, 0.16078432, 0.22745098, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_drvgu"]
+noise_type = 4
+frequency = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ulcgi"]
+width = 320
+height = 180
+noise = SubResource("FastNoiseLite_drvgu")
+color_ramp = SubResource("Gradient_drvgu")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nxogm"]
+texture = ExtResource("1_ulcgi")
+texture_region_size = Vector2i(1, 1)
+0:0/next_alternative_id = 9
+0:0/0 = 0
+0:0/0/modulate = Color(0.16862746, 0.16078432, 0.22745098, 1)
+0:0/1 = 1
+0:0/1/modulate = Color(0.1764706, 0.16862746, 0.23529412, 1)
+0:0/2 = 2
+0:0/2/modulate = Color(0.18431373, 0.17254902, 0.24313726, 1)
+0:0/3 = 3
+0:0/3/modulate = Color(0.19215687, 0.18039216, 0.2509804, 1)
+0:0/4 = 4
+0:0/4/modulate = Color(0.2, 0.1882353, 0.25882354, 1)
+0:0/5 = 5
+0:0/5/modulate = Color(0.20784314, 0.19215687, 0.26666668, 1)
+0:0/6 = 6
+0:0/6/modulate = Color(0.21568628, 0.2, 0.27450982, 1)
+0:0/7 = 7
+0:0/7/modulate = Color(0.22352941, 0.20784314, 0.28235295, 1)
+0:0/8 = 8
+0:0/8/modulate = Color(0.32941177, 0.2627451, 0.41960785, 1)
+
+[sub_resource type="TileSet" id="TileSet_3253y"]
+tile_size = Vector2i(1, 1)
+sources/0 = SubResource("TileSetAtlasSource_nxogm")
+
+[node name="Node2D" type="Node2D"]
+
+[node name="ColorRect2" type="ColorRect" parent="."]
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.20784314, 0.19215687, 0.26666668, 1)
+
+[node name="TextureRect" type="TextureRect" parent="ColorRect2"]
+layout_mode = 0
+offset_right = 320.0
+offset_bottom = 180.0
+texture = SubResource("NoiseTexture2D_ulcgi")
+
+[node name="Line2D" type="Line2D" parent="."]
+texture_repeat = 2
+position = Vector2(173.5, 92.5)
+points = PackedVector2Array(0, 0, 46, 0)
+width = 1.0
+sharp_limit = 0.0
+antialiased = true
+
+[node name="Line2D2" type="Line2D" parent="."]
+texture_repeat = 2
+position = Vector2(173.5, 92.5)
+rotation = 0.7853982
+points = PackedVector2Array(0, 0, 46, 0)
+width = 1.0
+sharp_limit = 0.0
+antialiased = true
+
+[node name="Line2D3" type="Line2D" parent="."]
+texture_repeat = 2
+position = Vector2(173.5, 92.5)
+rotation = 0.3926991
+points = PackedVector2Array(0, 0, 46, 0)
+width = 0.3
+sharp_limit = 0.0
+antialiased = true
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+scale = Vector2(10, 10)
+tile_map_data = PackedByteArray("AAAYAAYAAAAAAAAACAAYAAcAAAAAAAAACAAYAAgAAAAAAAAACAAYAAkAAAAAAAAACAAYAAoAAAAAAAAACAAYAAsAAAAAAAAACAAYAAwAAAAAAAAACAAOAAUAAAAAAAAACAAPAAUAAAAAAAAACAAQAAUAAAAAAAAACAARAAUAAAAAAAAACAASAAUAAAAAAAAACAATAAUAAAAAAAAACAAUAAUAAAAAAAAACAAVAAUAAAAAAAAACAAWAAUAAAAAAAAACAAXAAUAAAAAAAAACAAYAAUAAAAAAAAACAAZAAUAAAAAAAAACAAaAAUAAAAAAAAACAA=")
+tile_set = SubResource("TileSet_3253y")
+
+[node name="Pattern" type="Node" parent="TileMapLayer"]
+script = ExtResource("2_nxogm")
+alt_id_range = Vector2i(0, 4)
+pos_max = Vector2i(31, 17)
+forbidden_pairs = Array[Vector2i]([Vector2i(0, 4), Vector2i(1, 4), Vector2i(0, 3)])
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = 55.0
+offset_top = 120.0
+offset_right = 65.0
+offset_bottom = 130.0
+color = Color(0.011764706, 0.023529412, 0.09019608, 1)
+
+[node name="ColorRect3" type="ColorRect" parent="."]
+offset_left = 56.0
+offset_top = 81.0
+offset_right = 66.0
+offset_bottom = 84.0
+color = Color(0.70980394, 0.5686275, 0.68235296, 1)
