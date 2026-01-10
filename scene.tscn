@@ -1,8 +1,19 @@
-[gd_scene load_steps=5 format=3 uid="uid://cro2m5utrrmnf"]
+[gd_scene load_steps=9 format=3 uid="uid://cro2m5utrrmnf"]
 
 [ext_resource type="Texture2D" uid="uid://228xusoviqnl" path="res://assets/sprites/base.png" id="3_3253y"]
 [ext_resource type="Texture2D" uid="uid://cojumbjwvp5mf" path="res://assets/sprites/bg.png" id="3_m7jmp"]
 [ext_resource type="PackedScene" uid="uid://chs5l1e6nieeb" path="res://components/mol/laser/laser.tscn" id="3_u3cyc"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_3253y"]
+normal = Vector2(1, 0)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_u3cyc"]
+normal = Vector2(-1, 0)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_m7jmp"]
+normal = Vector2(0, 1)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_y2354"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u3cyc"]
 size = Vector2(120, 1)
@@ -30,6 +41,7 @@ offset_bottom = 107.0
 color = Color(0.011764706, 0.023529412, 0.09019608, 1)
 
 [node name="Base" type="NinePatchRect" parent="."]
+z_index = 10
 texture_filter = 1
 offset_right = 40.0
 offset_bottom = 180.0
@@ -39,7 +51,28 @@ patch_margin_left = 32
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 
+[node name="WorldBorder" type="StaticBody2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="Left" type="CollisionShape2D" parent="WorldBorder"]
+position = Vector2(-3, 1)
+shape = SubResource("WorldBoundaryShape2D_3253y")
+
+[node name="Right" type="CollisionShape2D" parent="WorldBorder"]
+position = Vector2(323, 6)
+shape = SubResource("WorldBoundaryShape2D_u3cyc")
+
+[node name="Top" type="CollisionShape2D" parent="WorldBorder"]
+position = Vector2(211, -5)
+shape = SubResource("WorldBoundaryShape2D_m7jmp")
+
+[node name="Bottom" type="CollisionShape2D" parent="WorldBorder"]
+position = Vector2(186, 183)
+shape = SubResource("WorldBoundaryShape2D_y2354")
+
 [node name="Wall - Top" type="ColorRect" parent="."]
+z_index = 10
 offset_right = 120.0
 offset_bottom = 1.0
 color = Color(0.32941177, 0.2627451, 0.41960785, 1)
@@ -51,7 +84,24 @@ collision_layer = 2
 position = Vector2(60, 0.5)
 shape = SubResource("RectangleShape2D_u3cyc")
 
+[node name="Wall - Top2" type="ColorRect" parent="."]
+z_index = 10
+offset_left = 115.0
+offset_top = 79.0
+offset_right = 235.0
+offset_bottom = 80.0
+rotation = 0.22814192
+color = Color(0.32941177, 0.2627451, 0.41960785, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Wall - Top2"]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall - Top2/StaticBody2D"]
+position = Vector2(60, 0.5)
+shape = SubResource("RectangleShape2D_u3cyc")
+
 [node name="Wall - Bottom" type="ColorRect" parent="."]
+z_index = 10
 offset_top = 179.0
 offset_right = 120.0
 offset_bottom = 180.0

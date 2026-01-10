@@ -38,6 +38,7 @@ position = Vector2(0, 0.5)
 points = PackedVector2Array(0, 0, 22, 0)
 width = 1.0
 
-[node name="RayCast2D" type="RayCast2D" parent="LaserLine"]
-position = Vector2(0, -0.5)
+[node name="RayCast" type="RayCast2D" parent="."]
+unique_name_in_owner = true
 target_position = Vector2(999, 0)
+collision_mask = 2
