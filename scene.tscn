@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://cro2m5utrrmnf"]
+[gd_scene load_steps=5 format=3 uid="uid://cro2m5utrrmnf"]
 
 [ext_resource type="Texture2D" uid="uid://228xusoviqnl" path="res://assets/sprites/base.png" id="3_3253y"]
 [ext_resource type="Texture2D" uid="uid://cojumbjwvp5mf" path="res://assets/sprites/bg.png" id="3_m7jmp"]
-[ext_resource type="Texture2D" uid="uid://coh6iso0lpptv" path="res://assets/sprites/laser.png" id="4_u3cyc"]
+[ext_resource type="PackedScene" uid="uid://chs5l1e6nieeb" path="res://components/mol/laser/laser.tscn" id="3_u3cyc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u3cyc"]
+size = Vector2(120, 1)
 
 [node name="Node2D" type="Node2D"]
 
@@ -20,10 +23,10 @@ texture = ExtResource("3_m7jmp")
 stretch_mode = 1
 
 [node name="ProtoEnemy" type="ColorRect" parent="."]
-offset_left = 55.0
-offset_top = 120.0
-offset_right = 65.0
-offset_bottom = 130.0
+offset_left = 273.0
+offset_top = 103.0
+offset_right = 277.0
+offset_bottom = 107.0
 color = Color(0.011764706, 0.023529412, 0.09019608, 1)
 
 [node name="Base" type="NinePatchRect" parent="."]
@@ -36,9 +39,41 @@ patch_margin_left = 32
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 
-[node name="Laser" type="Node" parent="."]
+[node name="Wall - Top" type="ColorRect" parent="."]
+offset_right = 120.0
+offset_bottom = 1.0
+color = Color(0.32941177, 0.2627451, 0.41960785, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="Laser"]
-texture_filter = 1
-position = Vector2(49, 16)
-texture = ExtResource("4_u3cyc")
+[node name="StaticBody2D" type="StaticBody2D" parent="Wall - Top"]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall - Top/StaticBody2D"]
+position = Vector2(60, 0.5)
+shape = SubResource("RectangleShape2D_u3cyc")
+
+[node name="Wall - Bottom" type="ColorRect" parent="."]
+offset_top = 179.0
+offset_right = 120.0
+offset_bottom = 180.0
+color = Color(0.32941177, 0.2627451, 0.41960785, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Wall - Bottom"]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall - Bottom/StaticBody2D"]
+position = Vector2(60, 0.5)
+shape = SubResource("RectangleShape2D_u3cyc")
+
+[node name="Laser" parent="." instance=ExtResource("3_u3cyc")]
+position = Vector2(49, 37)
+is_active = true
+
+[node name="Laser2" parent="." instance=ExtResource("3_u3cyc")]
+position = Vector2(49, 90)
+
+[node name="Laser3" parent="." instance=ExtResource("3_u3cyc")]
+position = Vector2(49, 143)
+
+[connection signal="OnFired" from="Laser" to="Laser2" method="set_active"]
+[connection signal="OnFired" from="Laser2" to="Laser3" method="set_active"]
+[connection signal="OnFired" from="Laser3" to="Laser" method="set_active"]
