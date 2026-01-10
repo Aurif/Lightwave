@@ -6,6 +6,7 @@ extends CharacterBody2D
             return
         is_active = value
         _handle_active_change()
+@export var modulate_target: CanvasItem
 const MOVE_SPEED: float = 50.0
 
 func _ready() -> void:
@@ -31,6 +32,7 @@ signal OnFired
 func set_active() -> void:
     self.is_active = true
 
+var sweep_last_exec: int = -1
 func _input(event: InputEvent) -> void:
     if not is_active:
         return
@@ -40,6 +42,24 @@ func _input(event: InputEvent) -> void:
             print("FIRE IN THE HOLE!!!")
             is_active = false
             OnFired.emit.call_deferred()
+            
+    if event is InputEventKey and event.pressed \
+     and InputMap.event_is_action(event, "switch_angle") \
+     and (not event.echo or Time.get_ticks_msec() > sweep_last_exec + SWEEP_COOLDOWN):
+        sweep_last_exec = Time.get_ticks_msec()
+        print("W")
+        switch_angle()
+
+###
+### Aim handling
+###
+const SWEEP_COOLDOWN: int = 150
+const VALID_ANGLES: Array[int] = [-45, -30, -15, 0, 15, 30, 45]
+var current_angle: int = 3
+
+func switch_angle() -> void:
+    current_angle = (current_angle + 1) % len(VALID_ANGLES)
+    %LaserLine.rotation_degrees = VALID_ANGLES[current_angle]
 
 ###
 ### Active animation
@@ -56,5 +76,7 @@ func _handle_active_change():
             return
         tween = get_tree().create_tween().bind_node(self)
         tween.set_loops()
-        tween.tween_property(self,"modulate",Color(2, 2, 2),0.13)
-        tween.tween_property(self,"modulate",Color.WHITE,0.9)
+        tween.tween_property(modulate_target,"modulate",Color(2, 2, 2),0.13)
+        tween.tween_property(modulate_target,"modulate",Color.WHITE,0.9)
+        
+    %LaserLine.visible = is_active

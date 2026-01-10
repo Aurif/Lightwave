@@ -65,14 +65,14 @@ position = Vector2(60, 0.5)
 shape = SubResource("RectangleShape2D_u3cyc")
 
 [node name="Laser" parent="." instance=ExtResource("3_u3cyc")]
-position = Vector2(49, 37)
+position = Vector2(50, 37)
 is_active = true
 
 [node name="Laser2" parent="." instance=ExtResource("3_u3cyc")]
-position = Vector2(49, 90)
+position = Vector2(50, 90)
 
 [node name="Laser3" parent="." instance=ExtResource("3_u3cyc")]
-position = Vector2(49, 143)
+position = Vector2(50, 143)
 
 [connection signal="OnFired" from="Laser" to="Laser2" method="set_active"]
 [connection signal="OnFired" from="Laser2" to="Laser3" method="set_active"]
