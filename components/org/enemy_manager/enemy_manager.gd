@@ -14,7 +14,6 @@ signal AfterTick
 # TODO: More enemy types
 # TODO: Some upgrades for kills
 # TODO: Way to win / final sequence
-# TODO: Title screen with instructions and keybinds
 # TODO: Ability to restart game after losing
 func _ready() -> void:
     if tick_on_start:

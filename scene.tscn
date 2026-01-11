@@ -255,7 +255,78 @@ theme_override_font_sizes/font_size = 26
 text = "DARKNESS"
 horizontal_alignment = 1
 
+[node name="TitleScreen" type="Node2D" parent="."]
+z_index = 19
+
+[node name="Game Name" type="Label" parent="TitleScreen"]
+texture_filter = 1
+offset_left = 145.0
+offset_top = 20.0
+offset_right = 319.0
+offset_bottom = 53.0
+theme_override_colors/font_color = Color(0.32941177, 0.2627451, 0.41960785, 1)
+theme_override_fonts/font = ExtResource("10_5juve")
+theme_override_font_sizes/font_size = 13
+text = "what comes 
+from the dark"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="TitleScreen/Game Name"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = 5.0
+offset_right = 165.0
+offset_bottom = 35.0
+texture = ExtResource("8_xlvrw")
+stretch_mode = 1
+
+[node name="Instruction" type="Label" parent="TitleScreen"]
+texture_filter = 1
+offset_left = 161.0
+offset_top = 84.0
+offset_right = 301.0
+offset_bottom = 117.0
+theme_override_colors/font_color = Color(0.32941177, 0.2627451, 0.41960785, 1)
+theme_override_fonts/font = ExtResource("10_5juve")
+theme_override_font_sizes/font_size = 7
+text = " A/D  - Steer turret left and right
+  W   - change shooting angle
+shift - shoot"
+
+[node name="TextureRect" type="TextureRect" parent="TitleScreen/Instruction"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -1.0
+offset_top = -4.0
+offset_right = 140.0
+offset_bottom = 25.0
+texture = ExtResource("8_xlvrw")
+stretch_mode = 1
+
+[node name="Goal" type="Label" parent="TitleScreen"]
+texture_filter = 1
+offset_left = 145.0
+offset_top = 143.0
+offset_right = 319.0
+offset_bottom = 149.0
+theme_override_colors/font_color = Color(0.32941177, 0.2627451, 0.41960785, 1)
+theme_override_fonts/font = ExtResource("10_5juve")
+theme_override_font_sizes/font_size = 7
+text = "GOal: survive"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="TitleScreen/Goal"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = 55.0
+offset_top = -3.0
+offset_right = 115.0
+offset_bottom = 7.0
+texture = ExtResource("8_xlvrw")
+stretch_mode = 1
+
 [connection signal="FireLaser" from="Lasers/Laser" to="BulletTracer" method="start_laser"]
+[connection signal="FireLaser" from="Lasers/Laser" to="TitleScreen" method="hide" unbinds=2]
 [connection signal="OnFired" from="Lasers/Laser" to="Lasers/Laser2" method="set_active"]
 [connection signal="FireLaser" from="Lasers/Laser2" to="BulletTracer" method="start_laser"]
 [connection signal="OnFired" from="Lasers/Laser2" to="Lasers/Laser3" method="set_active"]
