@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cro2m5utrrmnf"]
+[gd_scene load_steps=25 format=3 uid="uid://cro2m5utrrmnf"]
 
 [ext_resource type="Texture2D" uid="uid://228xusoviqnl" path="res://assets/sprites/base.png" id="3_3253y"]
 [ext_resource type="Texture2D" uid="uid://cojumbjwvp5mf" path="res://assets/sprites/bg.png" id="3_m7jmp"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://w2rg8dybf6gw" path="res://assets/sprites/bg_shadow.png" id="8_xlvrw"]
 [ext_resource type="FontFile" uid="uid://cw75qkqjyv60b" path="res://assets/fonts/3x5.png" id="10_5juve"]
 [ext_resource type="Script" uid="uid://bnra6i6bvh81g" path="res://components/org/hp/hp.gd" id="11_fy5k1"]
+[ext_resource type="Script" uid="uid://b3uxc4gps3b3j" path="res://components/org/restart/restart.gd" id="12_5c1cw"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_3253y"]
 normal = Vector2(1, 0)
@@ -257,9 +258,9 @@ color = Color(0.011764706, 0.023529412, 0.09019608, 1)
 [node name="LABEL" type="Label" parent="UI/GameOver"]
 texture_filter = 1
 layout_mode = 0
-offset_top = 45.0
+offset_top = 44.0
 offset_right = 320.0
-offset_bottom = 96.0
+offset_bottom = 95.0
 theme_override_colors/font_color = Color(0.32941177, 0.2627451, 0.41960785, 1)
 theme_override_fonts/font = ExtResource("10_5juve")
 theme_override_font_sizes/font_size = 16
@@ -271,14 +272,28 @@ horizontal_alignment = 1
 [node name="LABEL2" type="Label" parent="UI/GameOver"]
 texture_filter = 1
 layout_mode = 0
-offset_top = 91.0
+offset_top = 90.0
 offset_right = 320.0
-offset_bottom = 142.0
+offset_bottom = 141.0
 theme_override_colors/font_color = Color(0.32941177, 0.2627451, 0.41960785, 1)
 theme_override_fonts/font = ExtResource("10_5juve")
 theme_override_font_sizes/font_size = 26
 text = "DARKNESS"
 horizontal_alignment = 1
+
+[node name="LABEL3" type="Label" parent="UI/GameOver"]
+process_mode = 2
+texture_filter = 1
+layout_mode = 0
+offset_top = 143.0
+offset_right = 320.0
+offset_bottom = 149.0
+theme_override_colors/font_color = Color(0.32941177, 0.2627451, 0.41960785, 1)
+theme_override_fonts/font = ExtResource("10_5juve")
+theme_override_font_sizes/font_size = 7
+text = "press w to try again"
+horizontal_alignment = 1
+script = ExtResource("12_5c1cw")
 
 [node name="VictoryScreen" type="Label" parent="UI"]
 visible = false

@@ -16,7 +16,6 @@ signal AfterTick
 
 
 # TODO: More enemy types
-# TODO: Ability to restart game after losing
 func _ready() -> void:
     if tick_on_start:
         tick_enemies.call_deferred(true)
@@ -112,7 +111,7 @@ func _spawn_enemy_wave(layer: int = 0, instant: bool = false) -> void:
         valid_spawn_points.append(Vector2i(layer, y))
         
     valid_spawn_points.shuffle()
-    var max_to_spawn: int = floor(3+((current_wave-1.0)/(MAX_WAVE-1.0))*(max_size.y*0.7-3)) 
+    var max_to_spawn: int = floor(3+((current_wave-1.0)/(MAX_WAVE-1.0))*(max_size.y*0.6-3)) 
     if len(valid_spawn_points) > 0:
         for i in range(randi_range(1, min(max_to_spawn, len(valid_spawn_points)))):
             _spawn_enemy(valid_spawn_points[i], instant)
