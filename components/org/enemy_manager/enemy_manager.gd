@@ -3,17 +3,20 @@ extends Node
 @export var enemy_prefab: PackedScene
 @export var max_size: Vector2i
 @export var tick_on_start: bool = true
+@export var wave_label: Label
+@export var light_overlay: CanvasItem
+@export var show_on_victory: CanvasItem
 
+var current_wave: int = 0
 var enemy_map: Dictionary[Vector2i, Node2D] = {}
 const MOVE_DISTANCE: int = 4
+const MAX_WAVE: int = 10
 
 signal AfterTick
 
 
 # TODO: Ramping wave difficulty
 # TODO: More enemy types
-# TODO: Some upgrades for kills
-# TODO: Way to win / final sequence
 # TODO: Ability to restart game after losing
 func _ready() -> void:
     if tick_on_start:
@@ -22,15 +25,30 @@ func _ready() -> void:
 func tick_enemies(instant: bool = false) -> void:
     movement_anim_delays.clear()
     _move_enemies()
-    for i in range(MOVE_DISTANCE-1, -1, -1):
-        _spawn_enemy_wave(i, instant)
 
-    if instant:
+    current_wave += 1
+    if current_wave > MAX_WAVE:
+        wave_label.text = "Kill them all"
+        if movement_anim_delays.is_empty():
+            _on_victory()
+            return
+    else:
+        wave_label.text = "Wave: %d/%d" % [current_wave, MAX_WAVE]
+
+    if current_wave <= MAX_WAVE:
+        for i in range(MOVE_DISTANCE-1, -1, -1):
+            _spawn_enemy_wave(i, instant)
+        
+    if instant or movement_anim_delays.is_empty():
         AfterTick.emit()
         return
     var delay_tween: Tween = get_tree().create_tween().bind_node(self)
     delay_tween.tween_interval(movement_anim_delays.values().max()+MOVEMENT_SPEED)
     delay_tween.tween_callback(AfterTick.emit)
+    
+    if current_wave == MAX_WAVE + 1:
+        var light_tween: Tween = get_tree().create_tween().bind_node(self)
+        light_tween.tween_property(light_overlay, 'modulate', Color(1, 1, 1, 0.4), 3)
     
 ###
 ### Movement
@@ -89,7 +107,7 @@ func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vec
 ###
 func _spawn_enemy_wave(layer: int = 0, instant: bool = false) -> void:
     var valid_spawn_points: Array[Vector2i] = []
-    for y in range(max_size.y+1):
+    for y in range(max_size.y):
         if enemy_map.has(Vector2i(layer, y)):
             continue
         valid_spawn_points.append(Vector2i(layer, y))
@@ -113,4 +131,22 @@ func _clear_pos(target: Node2D) -> void:
     for key in enemy_map:
         if enemy_map[key] == target:
             enemy_map.erase(key)
-            return 
+            break
+            
+    if enemy_map.is_empty() and current_wave > MAX_WAVE:
+        _on_victory()
+
+###
+### Victory
+###
+var victory_trigger: bool = false
+func _on_victory() -> void:
+    if victory_trigger:
+        return
+    victory_trigger = true
+    
+    var tween: Tween = get_tree().create_tween().bind_node(show_on_victory)
+    show_on_victory.visible = true
+    show_on_victory.modulate = Color.TRANSPARENT
+    tween.tween_property(show_on_victory, 'modulate', Color.WHITE, 3)
+    
