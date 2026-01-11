@@ -10,12 +10,10 @@ const MOVE_DISTANCE: int = 4
 signal AfterTick
 
 
-# TODO: Ability to hit enemies
 # TODO: Ramping wave difficulty
 # TODO: More enemy types
 # TODO: Some upgrades for kills
 # TODO: Way to win / final sequence
-# TODO: Overlay darkness
 # TODO: Title screen with instructions and keybinds
 # TODO: A way to actually lose hp / lose game
 func _ready() -> void:

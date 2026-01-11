@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cro2m5utrrmnf"]
+[gd_scene load_steps=22 format=3 uid="uid://cro2m5utrrmnf"]
 
 [ext_resource type="Texture2D" uid="uid://228xusoviqnl" path="res://assets/sprites/base.png" id="3_3253y"]
 [ext_resource type="Texture2D" uid="uid://cojumbjwvp5mf" path="res://assets/sprites/bg.png" id="3_m7jmp"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://0x73rcsem3bv" path="res://components/mol/enemy/enemy.tscn" id="5_y2354"]
 [ext_resource type="Script" uid="uid://dtvs6dv3k5mdl" path="res://components/org/bullet_tracer/bullet_tracer.gd" id="6_ni31j"]
 [ext_resource type="Texture2D" uid="uid://b8k4vbrr0xegr" path="res://assets/sprites/laser_point.png" id="6_y2354"]
+[ext_resource type="Shader" uid="uid://dfsvbot1app06" path="res://components/org/darkness/shader.gdshader" id="8_73fnb"]
+[ext_resource type="Texture2D" uid="uid://w2rg8dybf6gw" path="res://assets/sprites/bg_shadow.png" id="8_xlvrw"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_3253y"]
 normal = Vector2(1, 0)
@@ -24,6 +26,29 @@ size = Vector2(120, 1)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ni31j"]
 size = Vector2(5, 5)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_73fnb"]
+viewport_path = NodePath("Darkness/Mask")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_73fnb"]
+resource_local_to_scene = true
+shader = ExtResource("8_73fnb")
+shader_parameter/mask_tex = SubResource("ViewportTexture_73fnb")
+
+[sub_resource type="Gradient" id="Gradient_73fnb"]
+colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_5juve"]
+gradient = SubResource("Gradient_73fnb")
+fill_from = Vector2(0.50934577, 0)
+
+[sub_resource type="Gradient" id="Gradient_5juve"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.48, 0.52, 1)
+colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fy5k1"]
+gradient = SubResource("Gradient_5juve")
 
 [node name="Root" type="Node2D"]
 
@@ -117,9 +142,10 @@ script = ExtResource("4_m7jmp")
 enemy_prefab = ExtResource("5_y2354")
 max_size = Vector2i(25, 18)
 
-[node name="BulletTracer" type="Node" parent="." node_paths=PackedStringArray("laser")]
+[node name="BulletTracer" type="Node" parent="." node_paths=PackedStringArray("laser", "light_pass")]
 script = ExtResource("6_ni31j")
 laser = NodePath("Bullet")
+light_pass = NodePath("../Darkness/Mask/LightPassAnchor")
 
 [node name="Bullet" type="Area2D" parent="BulletTracer"]
 visible = false
@@ -131,8 +157,49 @@ collision_mask = 4
 shape = SubResource("RectangleShape2D_ni31j")
 
 [node name="Sprite2D" type="Sprite2D" parent="BulletTracer/Bullet"]
+z_index = 2
 texture_filter = 1
 texture = ExtResource("6_y2354")
+
+[node name="Darkness" type="Node" parent="."]
+
+[node name="Sprite" type="TextureRect" parent="Darkness"]
+z_index = 1
+texture_filter = 1
+material = SubResource("ShaderMaterial_73fnb")
+offset_right = 320.0
+offset_bottom = 180.0
+texture = ExtResource("8_xlvrw")
+stretch_mode = 1
+
+[node name="Mask" type="SubViewport" parent="Darkness"]
+handle_input_locally = false
+size = Vector2i(320, 180)
+render_target_update_mode = 4
+
+[node name="BG" type="ColorRect" parent="Darkness/Mask"]
+offset_right = 320.0
+offset_bottom = 180.0
+
+[node name="Base - gradient" type="TextureRect" parent="Darkness/Mask"]
+offset_right = 136.0
+offset_bottom = 180.0
+texture = SubResource("GradientTexture2D_5juve")
+
+[node name="LightPassAnchor" type="Node2D" parent="Darkness/Mask"]
+visible = false
+position = Vector2(193, 0)
+
+[node name="LightPassGradient" type="TextureRect" parent="Darkness/Mask/LightPassAnchor"]
+offset_left = -42.0
+offset_right = 42.0
+offset_bottom = 180.0
+texture = SubResource("GradientTexture2D_fy5k1")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+z_index = 20
+offset_right = 320.0
+offset_bottom = 180.0
 
 [connection signal="FireLaser" from="Lasers/Laser" to="BulletTracer" method="start_laser"]
 [connection signal="OnFired" from="Lasers/Laser" to="Lasers/Laser2" method="set_active"]

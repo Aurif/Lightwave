@@ -1,6 +1,7 @@
 extends Node
 
 @export var laser: Area2D 
+@export var light_pass: Node2D
 
 var current_path: Array[Vector2] = []
 const LASER_SPEED: float = 400
@@ -41,6 +42,7 @@ func _update_laser_pos(distance_to_travel: float) -> void:
             distance_to_travel = 0
     
     laser.global_position = current_pos
+    light_pass.global_position.x = current_pos.x
     
 ###
 ### Hooks
@@ -49,11 +51,15 @@ var is_active: bool = false
 var on_finish_callback: Callable
 func start_laser(path: Array[Vector2], callback: Callable) -> void:
     laser.global_position = path[0]
+    light_pass.global_position.x = laser.global_position.x
     laser.visible = true
+    light_pass.visible = true
+    light_pass.modulate = Color.WHITE
     is_active = true
     current_path = path
     on_finish_callback = callback
     
+const LIGHT_FADE_SPEED: float = 0.2
 func _on_laser_finished() -> void:
     if not is_active:
         return
@@ -62,4 +68,7 @@ func _on_laser_finished() -> void:
     on_finish_callback.call()
     laser.visible = false
     current_path = []
+    
+    var tween: Tween = get_tree().create_tween().bind_node(light_pass)
+    tween.tween_property(light_pass, "modulate", Color.TRANSPARENT, LIGHT_FADE_SPEED)
     
