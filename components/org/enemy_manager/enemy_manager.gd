@@ -14,19 +14,23 @@ signal AfterTick
 # TODO: Ramping wave difficulty
 # TODO: More enemy types
 # TODO: Some upgrades for kills
+# TODO: Way to win / final sequence
 # TODO: Overlay darkness
 # TODO: Title screen with instructions and keybinds
 # TODO: A way to actually lose hp / lose game
 func _ready() -> void:
     if tick_on_start:
-        tick_enemies.call_deferred()
+        tick_enemies.call_deferred(true)
 
-func tick_enemies() -> void:
+func tick_enemies(instant: bool = false) -> void:
     movement_anim_delays.clear()
     _move_enemies()
     for i in range(MOVE_DISTANCE-1, -1, -1):
-        _spawn_enemy_wave(i)
+        _spawn_enemy_wave(i, instant)
 
+    if instant:
+        AfterTick.emit()
+        return
     var delay_tween: Tween = get_tree().create_tween().bind_node(self)
     delay_tween.tween_interval(movement_anim_delays.values().max()+MOVEMENT_SPEED)
     delay_tween.tween_callback(AfterTick.emit)
@@ -59,8 +63,11 @@ const MOVEMENT_SPEED: float = 0.2
 const MOVEMENT_OVERLAP_MIN: float = 0.03
 const MOVEMENT_OVERLAP_MAX: float = 0.1
 var movement_anim_delays: Dictionary[int, float] = {}
-func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vector2.ZERO) -> void:
+func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vector2.ZERO, instant: bool = false) -> void:
     var new_pos_px: Vector2 = new_pos * Vector2i(-10, 10) + Vector2i(-5, 5)
+    if instant:
+        node.position = new_pos_px
+        return
     if start_pos_delta != Vector2.ZERO:
         node.position = new_pos_px + start_pos_delta
 
@@ -76,7 +83,7 @@ func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vec
 ###
 ### Spawning
 ###
-func _spawn_enemy_wave(layer: int = 0) -> void:
+func _spawn_enemy_wave(layer: int = 0, instant: bool = false) -> void:
     var valid_spawn_points: Array[Vector2i] = []
     for y in range(max_size.y+1):
         if enemy_map.has(Vector2i(layer, y)):
@@ -86,10 +93,20 @@ func _spawn_enemy_wave(layer: int = 0) -> void:
     valid_spawn_points.shuffle()
     if len(valid_spawn_points) > 0:
         for i in range(randi_range(1, min(3, len(valid_spawn_points)))):
-            _spawn_enemy(valid_spawn_points[i])
+            _spawn_enemy(valid_spawn_points[i], instant)
         
-func _spawn_enemy(pos: Vector2i) -> void:
+func _spawn_enemy(pos: Vector2i, instant: bool = false) -> void:
     var node: Node2D = enemy_prefab.instantiate()
     add_child(node)
-    _move_enemy(node, pos, Vector2(MOVE_DISTANCE*10, 0))
+    _move_enemy(node, pos, Vector2(MOVE_DISTANCE*10, 0), instant)
     enemy_map[pos] = node
+    node.tree_exiting.connect(_clear_pos.bind(node))
+
+###
+### Destroying
+###
+func _clear_pos(target: Node2D) -> void:
+    for key in enemy_map:
+        if enemy_map[key] == target:
+            enemy_map.erase(key)
+            return 

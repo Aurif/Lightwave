@@ -12,7 +12,7 @@ const MOVE_SPEED: float = 50.0
 func _ready() -> void:
     _handle_active_change()
 
-func _physics_process(_delta):
+func _physics_process(_delta) -> void:
     if not is_active:
         return
     var direction: float = Input.get_action_strength("move_down") \
@@ -30,6 +30,7 @@ func _physics_process(_delta):
 ###
 ### Firing handling
 ###
+signal FireLaser(path: Array[Vector2], callback: Callable)
 signal OnFired
 func set_active() -> void:
     self.is_active = true
@@ -39,17 +40,30 @@ func _input(event: InputEvent) -> void:
     if not is_active:
         return
     
-    if event is InputEventKey and event.pressed and not event.echo:
-        if event.keycode == KEY_SHIFT:
-            print("FIRE IN THE HOLE!!!")
-            is_active = false
-            OnFired.emit.call_deferred()
+    if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SHIFT:
+            _fire_laser()
             
     if event is InputEventKey and event.pressed \
      and InputMap.event_is_action(event, "switch_angle") \
      and (not event.echo or Time.get_ticks_msec() > sweep_last_exec + SWEEP_COOLDOWN):
         sweep_last_exec = Time.get_ticks_msec()
         switch_angle()
+
+func _fire_laser() -> void:
+    %LaserLine.default_color = Color('#d6ecff')
+    is_active = false
+    FireLaser.emit(_get_laser_path(), _after_fired)
+
+func _get_laser_path() -> Array[Vector2]:
+    var result: Array[Vector2] = []
+    for point in %LaserLine.points:
+        result.append(%LaserLine.to_global(point))
+    return result
+
+func _after_fired() -> void:
+    %LaserLine.visible = false
+    %LaserLine.default_color = Color('#d1b3ff73')
+    OnFired.emit.call_deferred()
 
 ###
 ### Aim handling
@@ -106,4 +120,5 @@ func _handle_active_change():
         tween.tween_property(modulate_target,"modulate",Color(2, 2, 2),0.13)
         tween.tween_property(modulate_target,"modulate",Color.WHITE,0.9)
         
-    %LaserLine.visible = is_active
+    if is_active:
+        %LaserLine.visible = true

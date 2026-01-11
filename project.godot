@@ -44,6 +44,8 @@ switch_angle={
 
 2d_physics/layer_1="Turret"
 2d_physics/layer_2="Walls"
+2d_physics/layer_3="Enemies"
+2d_physics/layer_4="Laser"
 
 [rendering]
 
