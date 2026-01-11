@@ -12,7 +12,7 @@ const MOVE_SPEED: float = 50.0
 func _ready() -> void:
     _handle_active_change()
 
-func _physics_process(delta):
+func _physics_process(_delta):
     if not is_active:
         return
     var direction: float = Input.get_action_strength("move_down") \
