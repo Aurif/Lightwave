@@ -10,12 +10,11 @@ extends Node
 var current_wave: int = 0
 var enemy_map: Dictionary[Vector2i, Node2D] = {}
 const MOVE_DISTANCE: int = 4
-const MAX_WAVE: int = 10
+const MAX_WAVE: int = 12
 
 signal AfterTick
 
 
-# TODO: Ramping wave difficulty
 # TODO: More enemy types
 # TODO: Ability to restart game after losing
 func _ready() -> void:
@@ -113,8 +112,9 @@ func _spawn_enemy_wave(layer: int = 0, instant: bool = false) -> void:
         valid_spawn_points.append(Vector2i(layer, y))
         
     valid_spawn_points.shuffle()
+    var max_to_spawn: int = floor(3+((current_wave-1.0)/(MAX_WAVE-1.0))*(max_size.y*0.7-3)) 
     if len(valid_spawn_points) > 0:
-        for i in range(randi_range(1, min(3, len(valid_spawn_points)))):
+        for i in range(randi_range(1, min(max_to_spawn, len(valid_spawn_points)))):
             _spawn_enemy(valid_spawn_points[i], instant)
         
 func _spawn_enemy(pos: Vector2i, instant: bool = false) -> void:
