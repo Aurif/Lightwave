@@ -5,19 +5,31 @@ extends Node
 @export var tick_on_start: bool = true
 
 var enemy_map: Dictionary[Vector2i, Node2D] = {}
-const MOVE_DISTANCE: int = 2
+const MOVE_DISTANCE: int = 4
 
 signal AfterTick
 
+
+# TODO: Ability to hit enemies
+# TODO: Ramping wave difficulty
+# TODO: More enemy types
+# TODO: Some upgrades for kills
+# TODO: Overlay darkness
+# TODO: Title screen with instructions and keybinds
+# TODO: A way to actually lose hp / lose game
 func _ready() -> void:
     if tick_on_start:
         tick_enemies.call_deferred()
 
 func tick_enemies() -> void:
+    movement_anim_delays.clear()
     _move_enemies()
-    _spawn_enemy_wave()
+    for i in range(MOVE_DISTANCE-1, -1, -1):
+        _spawn_enemy_wave(i)
 
-    AfterTick.emit()
+    var delay_tween: Tween = get_tree().create_tween().bind_node(self)
+    delay_tween.tween_interval(movement_anim_delays.values().max()+MOVEMENT_SPEED)
+    delay_tween.tween_callback(AfterTick.emit)
     
 ###
 ### Movement
@@ -37,12 +49,29 @@ func _move_enemies() -> void:
         var new_x: int = min(max_reachable.get(pos.y, max_size.x+1)-1, pos.x+MOVE_DISTANCE)
         max_reachable[pos.y] = new_x
         new_map[Vector2i(new_x, pos.y)] = enemy_map[pos]
-        _move_enemy(enemy_map[pos], Vector2i(new_x, pos.y))
+        if new_x != pos.x:
+            _move_enemy(enemy_map[pos], Vector2i(new_x, pos.y))
         
     enemy_map = new_map
         
-func _move_enemy(node: Node2D, new_pos: Vector2i) -> void:
-    node.position = new_pos * Vector2i(-10, 10) + Vector2i(-5, 5)
+const RANDOM_ROW_DELAY: float = 0.2
+const MOVEMENT_SPEED: float = 0.2
+const MOVEMENT_OVERLAP_MIN: float = 0.03
+const MOVEMENT_OVERLAP_MAX: float = 0.1
+var movement_anim_delays: Dictionary[int, float] = {}
+func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vector2.ZERO) -> void:
+    var new_pos_px: Vector2 = new_pos * Vector2i(-10, 10) + Vector2i(-5, 5)
+    if start_pos_delta != Vector2.ZERO:
+        node.position = new_pos_px + start_pos_delta
+
+    var tween: Tween = get_tree().create_tween().bind_node(node).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+    
+    if not movement_anim_delays.has(new_pos.y):
+        movement_anim_delays[new_pos.y] = randf()*RANDOM_ROW_DELAY
+    tween.tween_interval(movement_anim_delays[new_pos.y])
+    movement_anim_delays[new_pos.y] += randf_range(MOVEMENT_OVERLAP_MIN, MOVEMENT_OVERLAP_MAX)
+    
+    tween.tween_property(node, "position", new_pos_px, MOVEMENT_SPEED)
     
 ###
 ### Spawning
@@ -55,11 +84,12 @@ func _spawn_enemy_wave(layer: int = 0) -> void:
         valid_spawn_points.append(Vector2i(layer, y))
         
     valid_spawn_points.shuffle()
-    for i in range(randi_range(1, min(3, len(valid_spawn_points)))):
-        _spawn_enemy(valid_spawn_points[i])
+    if len(valid_spawn_points) > 0:
+        for i in range(randi_range(1, min(3, len(valid_spawn_points)))):
+            _spawn_enemy(valid_spawn_points[i])
         
 func _spawn_enemy(pos: Vector2i) -> void:
     var node: Node2D = enemy_prefab.instantiate()
     add_child(node)
-    node.position = pos * Vector2i(-10, 10) + Vector2i(-5, 5)
+    _move_enemy(node, pos, Vector2(MOVE_DISTANCE*10, 0))
     enemy_map[pos] = node
