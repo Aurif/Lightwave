@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqmda3rv1r53e"]
+
+[ext_resource type="PackedScene" uid="uid://0x73rcsem3bv" path="res://components/mol/enemy/enemy.tscn" id="1_yrt5a"]
+[ext_resource type="Texture2D" uid="uid://cy0tb64qw5hu7" path="res://assets/sprites/enemies/speedy.png" id="2_0iwn6"]
+
+[node name="Hitbox" instance=ExtResource("1_yrt5a")]
+speed = 6
+
+[node name="Enemy" parent="." index="1"]
+texture = ExtResource("2_0iwn6")

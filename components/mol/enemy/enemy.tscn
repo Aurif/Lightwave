@@ -1,5 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://0x73rcsem3bv"]
+[gd_scene load_steps=4 format=3 uid="uid://0x73rcsem3bv"]
 
+[ext_resource type="Script" uid="uid://bdux6wtsoxsqx" path="res://components/mol/enemy/enemy.gd" id="1_dga5s"]
 [ext_resource type="Texture2D" uid="uid://buchx102g1mv7" path="res://assets/sprites/enemies/default.png" id="1_uy72o"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uy72o"]
@@ -8,6 +9,7 @@ size = Vector2(10, 10)
 [node name="Hitbox" type="Area2D"]
 collision_layer = 4
 collision_mask = 0
+script = ExtResource("1_dga5s")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_uy72o")

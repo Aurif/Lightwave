@@ -1,6 +1,7 @@
 extends Node
 
 @export var enemy_prefab: PackedScene
+@export var enemy_variants_prefab: Array[PackedScene]
 @export var max_size: Vector2i
 @export var tick_on_start: bool = true
 @export var wave_label: Label
@@ -8,14 +9,13 @@ extends Node
 @export var show_on_victory: CanvasItem
 
 var current_wave: int = 0
-var enemy_map: Dictionary[Vector2i, Node2D] = {}
-const MOVE_DISTANCE: int = 4
+var enemy_map: Dictionary[Vector2i, MolEnemy] = {}
+const WAVES_PER_TICK: int = 4
 const MAX_WAVE: int = 12
 
 signal AfterTick
 
 
-# TODO: More enemy types
 func _ready() -> void:
     if tick_on_start:
         tick_enemies.call_deferred(true)
@@ -34,7 +34,7 @@ func tick_enemies(instant: bool = false) -> void:
         wave_label.text = "Wave: %d/%d" % [current_wave, MAX_WAVE]
 
     if current_wave <= MAX_WAVE:
-        for i in range(MOVE_DISTANCE-1, -1, -1):
+        for i in range(WAVES_PER_TICK-1, -1, -1):
             _spawn_enemy_wave(i, instant)
         
     if instant or movement_anim_delays.is_empty():
@@ -53,7 +53,7 @@ func tick_enemies(instant: bool = false) -> void:
 ###
 signal OnDamageTaken
 func _move_enemies() -> void:
-    var new_map: Dictionary[Vector2i, Node2D] = {}
+    var new_map: Dictionary[Vector2i, MolEnemy] = {}
     var max_reachable: Dictionary[int, int] = {}
     
     var current_positions: Array[Vector2i] = enemy_map.keys()
@@ -64,7 +64,7 @@ func _move_enemies() -> void:
     )
     
     for pos in current_positions:
-        var new_x: int = min(max_reachable.get(pos.y, max_size.x+2)-1, pos.x+MOVE_DISTANCE)
+        var new_x: int = min(max_reachable.get(pos.y, max_size.x+2)-1, pos.x+enemy_map[pos].speed)
         if new_x == max_size.x+1:
             var tween: Tween = _move_enemy(enemy_map[pos], Vector2i(max_size.x+8, pos.y))
             tween.tween_callback(enemy_map[pos].queue_free)
@@ -103,6 +103,7 @@ func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vec
 ###
 ### Spawning
 ###
+const BASE_VARIANT_CHANCE: float = 0.6
 func _spawn_enemy_wave(layer: int = 0, instant: bool = false) -> void:
     var valid_spawn_points: Array[Vector2i] = []
     for y in range(max_size.y):
@@ -111,15 +112,30 @@ func _spawn_enemy_wave(layer: int = 0, instant: bool = false) -> void:
         valid_spawn_points.append(Vector2i(layer, y))
         
     valid_spawn_points.shuffle()
-    var max_to_spawn: int = floor(3+((current_wave-1.0)/(MAX_WAVE-1.0))*(max_size.y*0.6-3)) 
     if len(valid_spawn_points) > 0:
-        for i in range(randi_range(1, min(max_to_spawn, len(valid_spawn_points)))):
-            _spawn_enemy(valid_spawn_points[i], instant)
+        var max_to_spawn: int = floor(3+((current_wave-1.0)/(MAX_WAVE-1.0))*(max_size.y*0.6-3))
+        var to_spawn: int = randi_range(1, min(max_to_spawn, len(valid_spawn_points)))
+        var spawn_index: int = 0
         
-func _spawn_enemy(pos: Vector2i, instant: bool = false) -> void:
-    var node: Node2D = enemy_prefab.instantiate()
+        for v in range(len(enemy_variants_prefab)):
+            var to_spawn_variant: int = floor(to_spawn*BASE_VARIANT_CHANCE*(current_wave-1.0)/(MAX_WAVE-1.0))
+            to_spawn -= to_spawn_variant
+            for _i in range(to_spawn_variant):
+                _spawn_enemy(valid_spawn_points[spawn_index], instant, v)
+                spawn_index += 1
+        
+        for _i in range(to_spawn):
+            _spawn_enemy(valid_spawn_points[spawn_index], instant)
+            spawn_index += 1
+        
+func _spawn_enemy(pos: Vector2i, instant: bool = false, variant: int = -1) -> void:
+    var node: MolEnemy
+    if variant == -1:
+        node = enemy_prefab.instantiate()
+    else:
+        node = enemy_variants_prefab[variant].instantiate()
     add_child(node)
-    _move_enemy(node, pos, Vector2(MOVE_DISTANCE*10, 0), instant)
+    _move_enemy(node, pos, Vector2(WAVES_PER_TICK*10, 0), instant)
     enemy_map[pos] = node
     node.tree_exiting.connect(_clear_pos.bind(node))
 

@@ -55,9 +55,12 @@ func start_laser(path: Array[Vector2], callback: Callable) -> void:
     laser.visible = true
     light_pass.visible = true
     light_pass.modulate = Color.WHITE
-    is_active = true
+    _set_active.call_deferred()
     current_path = path
     on_finish_callback = callback
+    
+func _set_active() -> void:
+    is_active = true
     
 const LIGHT_FADE_SPEED: float = 0.2
 func _on_laser_finished() -> void:
