@@ -15,7 +15,7 @@ signal AfterTick
 # TODO: Some upgrades for kills
 # TODO: Way to win / final sequence
 # TODO: Title screen with instructions and keybinds
-# TODO: A way to actually lose hp / lose game
+# TODO: Ability to restart game after losing
 func _ready() -> void:
     if tick_on_start:
         tick_enemies.call_deferred(true)
@@ -36,6 +36,7 @@ func tick_enemies(instant: bool = false) -> void:
 ###
 ### Movement
 ###
+signal OnDamageTaken
 func _move_enemies() -> void:
     var new_map: Dictionary[Vector2i, Node2D] = {}
     var max_reachable: Dictionary[int, int] = {}
@@ -48,11 +49,16 @@ func _move_enemies() -> void:
     )
     
     for pos in current_positions:
-        var new_x: int = min(max_reachable.get(pos.y, max_size.x+1)-1, pos.x+MOVE_DISTANCE)
-        max_reachable[pos.y] = new_x
-        new_map[Vector2i(new_x, pos.y)] = enemy_map[pos]
-        if new_x != pos.x:
-            _move_enemy(enemy_map[pos], Vector2i(new_x, pos.y))
+        var new_x: int = min(max_reachable.get(pos.y, max_size.x+2)-1, pos.x+MOVE_DISTANCE)
+        if new_x == max_size.x+1:
+            var tween: Tween = _move_enemy(enemy_map[pos], Vector2i(max_size.x+8, pos.y))
+            tween.tween_callback(enemy_map[pos].queue_free)
+            tween.tween_callback(OnDamageTaken.emit)
+        else:
+            max_reachable[pos.y] = new_x
+            new_map[Vector2i(new_x, pos.y)] = enemy_map[pos]
+            if new_x != pos.x:
+                _move_enemy(enemy_map[pos], Vector2i(new_x, pos.y))
         
     enemy_map = new_map
         
@@ -61,11 +67,11 @@ const MOVEMENT_SPEED: float = 0.2
 const MOVEMENT_OVERLAP_MIN: float = 0.03
 const MOVEMENT_OVERLAP_MAX: float = 0.1
 var movement_anim_delays: Dictionary[int, float] = {}
-func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vector2.ZERO, instant: bool = false) -> void:
+func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vector2.ZERO, instant: bool = false) -> Tween:
     var new_pos_px: Vector2 = new_pos * Vector2i(-10, 10) + Vector2i(-5, 5)
     if instant:
         node.position = new_pos_px
-        return
+        return null
     if start_pos_delta != Vector2.ZERO:
         node.position = new_pos_px + start_pos_delta
 
@@ -77,6 +83,7 @@ func _move_enemy(node: Node2D, new_pos: Vector2i, start_pos_delta: Vector2 = Vec
     movement_anim_delays[new_pos.y] += randf_range(MOVEMENT_OVERLAP_MIN, MOVEMENT_OVERLAP_MAX)
     
     tween.tween_property(node, "position", new_pos_px, MOVEMENT_SPEED)
+    return tween
     
 ###
 ### Spawning

@@ -65,10 +65,10 @@ func _on_laser_finished() -> void:
         return
     is_active = false
     
-    on_finish_callback.call()
     laser.visible = false
     current_path = []
     
     var tween: Tween = get_tree().create_tween().bind_node(light_pass)
     tween.tween_property(light_pass, "modulate", Color.TRANSPARENT, LIGHT_FADE_SPEED)
+    tween.tween_callback(on_finish_callback)
     
